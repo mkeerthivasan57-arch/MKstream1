@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MKstream</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="data.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <img id="site-logo" src="assets/logo.png" alt="MKstream">
+      <h1 id="site-name">MKstream</h1>
+    </div>
+    <nav class="menu">
+      <ul id="menu-items"></ul>
+    </nav>
+    <a href="admin.html" class="admin-link" target="_blank">Admin</a>
+  </header>
+
+  <section id="categories">
+    <h2>Categories</h2>
+    <div class="category-list" id="category-list"></div>
+  </section>
+
+  <section id="recent">
+    <h2>Recently Uploaded</h2>
+    <div class="content-grid" id="recent-list"></div>
+  </section>
+
+  <section id="popular">
+    <h2>Most Viewed</h2>
+    <div class="content-grid" id="popular-list"></div>
+  </section>
+
+  <footer>
+    <p>&copy; <span id="year"></span> MKstream</p>
+  </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  function renderHomeWidgets(){
+    const videos = JSON.parse(localStorage.getItem('mk_videos')||'[]');
+    const recent = videos.slice().sort((a,b)=> (b.id||0) - (a.id||0)).slice(0,30);
+    const grid = document.getElementById('videoGrid') || document.getElementById('homeGrid') || document.body;
+    if(grid && recent.length){
+      const container = document.createElement('div'); container.id='recentUploads'; container.innerHTML = '<h2>Recent Uploads</h2><div class="video-grid"></div>';
+      recent.forEach(v=>{ const el=document.createElement('div'); el.className='video-card'; el.innerHTML=`<a href="player.html?id=${v.id}"><img src="${v.thumb||'assets/images/default.jpg'}"><div class="meta"><h3>${v.title}</h3></div></a>`; container.querySelector('.video-grid').appendChild(el); });
+      grid.prepend(container);
+    }
+    // Most viewed
+    const most = JSON.parse(localStorage.getItem('mk_most_viewed')||'{}');
+    const side = document.getElementById('mostViewed') || document.createElement('aside');
+    side.id = 'mostViewed';
+    side.innerHTML = '<h3>Most Viewed</h3>';
+    const arr = Object.keys(most).map(k=>({k,views:most[k]})).sort((a,b)=>b.views-a.views).slice(0,10);
+    arr.forEach(it=>{ const seriesId = it.k.split(':')[0]; const s = videos.find(x=>x.id==seriesId); if(s) side.innerHTML += '<div><a href="player.html?id='+s.id+'">'+s.title+' <small>('+it.views+')</small></a></div>'; });
+    document.body.appendChild(side);
+  }
+  renderHomeWidgets();
+});
+</script>
+</body>
+</html>
